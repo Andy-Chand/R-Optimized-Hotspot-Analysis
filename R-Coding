@@ -1,0 +1,45 @@
+# ------------------------------------------------------------------------------
+# Program: Greenhouse Gas Correlations
+# Name: Andy Chand
+# ------------------------------------------------------------------------------
+
+# Load ArcGISBinding and check for a license
+library("arcgisbinding")
+arc.check_product()
+
+# Load the ggplot module
+# install.packages("ggplot2")
+library("ggplot2")
+
+# Access the Feature Class Table
+FC <- arc.open("ASGN2A.gdb\\PostalCode_CT_DA")
+
+# Create a R DataFrame (df) (table) from the Feature Class Table
+# c() combines feature class columns into a list
+# "<-" is used instead of an "="; Known as a "pipe"
+dfEnergy <- arc.select(FC, c("Avg_Annual_GHG_CO2Tonnes", "Avg_Annual_Energy_GJ", "LICO", "PercentAfter1980"))
+
+# Houses Built After 1980 and Annual Energy Usage GJ
+# Scatterplot: x-axis %After1980, y-axis AvgAnnualEnergy
+# Ending a line with a "+" tells R to continue to the next line
+# ggtitle will title the graph
+# geom_points adds points to the graph
+HomesVsTtlEnergy_Graph <- ggplot(dfEnergy, aes(x = PercentAfter1980, y = Avg_Annual_Energy_GJ)) +
+ggtitle("% Homes Built After 1980 vs Total Energy (GJ)") + geom_point() +
+stat_smooth(metho = "1m",
+col = "#C42126",
+se = FALSE,
+size = 1)
+HomesVsTtlEnergy_Graph
+
+# Correlation Average Annual Greenhouse Gas Emission and Houses Built After 1980
+cor.test(dfEnergy$Avg_Annual_GHG_CO2Tonnes, dfEnergy$PercentAfter1980)
+
+# Correlation Average Annual Greenhouse Gas Emission and Low Income Cut-Off
+cor.test(dfEnergy$Avg_Annual_GHG_CO2Tonnes, dfEnergy$LICO)
+
+# Correlation Average Annual Energy Consumption and Low Income Cut-Off
+cor.test(dfEnergy$Avg_Annual_Energy_GJ, dfEnergy$LICO)
+
+# Correlation Average Annual Energy Consumption and Houses Built After 1980
+cor.test(dfEnergy$Avg_Annual_Energy_GJ, dfEnergy$PercentAfter1980)
